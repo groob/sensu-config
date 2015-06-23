@@ -45,7 +45,7 @@ func main() {
 	}
 	api := &API{port}
 	sensuConfig := &SensuConfig{*rabbitMQ, *redis, *api}
-	f, err := os.Create("config.json")
+	f, err := os.Create("/etc/sensu/conf.d/config.json")
 	if err != nil {
 		log.Fatal(err)
 	}
