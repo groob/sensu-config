@@ -12,7 +12,9 @@ type Redis struct {
 }
 
 type API struct {
-	Port int `json:"port"`
+	Port     int    `json:"port"`
+	User     string `json:"user"`
+	Password string `json:"password"`
 }
 
 type RabbitMQ struct {
@@ -43,7 +45,10 @@ func main() {
 	redis := &Redis{
 		os.Getenv("SENSU_REDIS_HOST"),
 	}
-	api := &API{port}
+	api := &API{Port: port,
+		User:     os.Getenv("SENSU_API_USER"),
+		Password: os.Getenv("SENSU_API_PASSWORD"),
+	}
 	sensuConfig := &SensuConfig{*rabbitMQ, *redis, *api}
 	f, err := os.Create("/etc/sensu/conf.d/config.json")
 	if err != nil {
