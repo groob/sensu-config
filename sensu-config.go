@@ -26,16 +26,16 @@ type RabbitMQ struct {
 }
 
 type SensuConfig struct {
-	RabbitMQ RabbitMQ `json:"rabbitmq"`
-	Redis    Redis    `json:"redis"`
-	API      API      `json:"api"`
+	RabbitMQ *RabbitMQ `json:"rabbitmq"`
+	Redis    *Redis    `json:"redis"`
+	API      *API      `json:"api"`
 }
 
-func main() {
+func NewConfig() (*SensuConfig, error) {
 	apiPort := os.Getenv("SENSU_API_PORT") // getenv is string, we need an int
 	port, err := strconv.Atoi(apiPort)     // convert
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	rabbitMQ := &RabbitMQ{
 		os.Getenv("SENSU_RABBITMQ_HOST"),
@@ -46,22 +46,39 @@ func main() {
 	redis := &Redis{
 		os.Getenv("SENSU_REDIS_HOST"),
 	}
+
 	api := &API{Port: port,
 		Host:     os.Getenv("SENSU_API_HOST"),
 		User:     os.Getenv("SENSU_API_USER"),
 		Password: os.Getenv("SENSU_API_PASSWORD"),
 	}
-	sensuConfig := &SensuConfig{*rabbitMQ, *redis, *api}
-	f, err := os.Create("/etc/sensu/conf.d/config.json")
+
+	sensuConfig := &SensuConfig{rabbitMQ, redis, api}
+	return sensuConfig, nil
+}
+
+func (c *SensuConfig) Write(path string) error {
+	f, err := os.Create(path)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer f.Close()
-	jsn, err := json.MarshalIndent(sensuConfig, "", "\t")
+	jsn, err := json.MarshalIndent(c, "", "\t")
+	if err != nil {
+		return err
+	}
+	_, err = f.Write(jsn)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func main() {
+	config, err := NewConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = f.Write(jsn)
+	err = config.Write("/etc/sensu/conf.d/config.json")
 	if err != nil {
 		log.Fatal(err)
 	}
