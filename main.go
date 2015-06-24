@@ -13,8 +13,8 @@ type Redis struct {
 
 type API struct {
 	Port     int    `json:"port"`
-	User     string `json:"user"`
-	Password string `json:"password"`
+	User     string `json:"user,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 
 type RabbitMQ struct {
