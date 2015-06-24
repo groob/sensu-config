@@ -12,6 +12,7 @@ type Redis struct {
 }
 
 type API struct {
+	Host     string `json:"host"`
 	Port     int    `json:"port"`
 	User     string `json:"user,omitempty"`
 	Password string `json:"password,omitempty"`
@@ -46,6 +47,7 @@ func main() {
 		os.Getenv("SENSU_REDIS_HOST"),
 	}
 	api := &API{Port: port,
+		Host:     os.Getenv("SENSU_API_HOST"),
 		User:     os.Getenv("SENSU_API_USER"),
 		Password: os.Getenv("SENSU_API_PASSWORD"),
 	}
